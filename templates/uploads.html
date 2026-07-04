@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel Barcode Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="upload-card">
+  <h2>📤 Excel Barcode Generator</h2>
+
+  <form class="upload-form" id="uploadForm">
+    <div class="file-input-wrapper">
+      <label for="fileInput">Choose Excel file</label>
+      <div class="file-input-area">
+        <input type="file" id="fileInput" name="uploadedFile" accept=".xlsx,.xls">
+        <button type="button" class="file-picker-btn" id="filePickerBtn">Browse…</button>
+        <span id="file-name-display" class="file-name-placeholder">No file selected</span>
+      </div>
+    </div>
+
+    <button type="submit" class="upload-btn" id="uploadBtn">Upload & Generate Barcodes</button>
+    <div class="loader" id="loader"></div>
+    <div class="status-message" id="formStatus"></div>
+  </form>
+
+  <div id="resultsSection" class="results-section" style="display: none;">
+    <h3>📊 Processing Results</h3>
+    <div id="resultsContent" class="results-content"></div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const filePickerBtn = document.getElementById('filePickerBtn');
+    const uploadForm = document.getElementById('uploadForm');
+    const statusMsg = document.getElementById('formStatus');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const loader = document.getElementById('loader');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsContent = document.getElementById('resultsContent');
+
+    function updateFileName() {
+      const files = fileInput.files;
+      if (files && files.length > 0) {
+        fileNameDisplay.textContent = files[0].name;
+        fileNameDisplay.classList.remove('file-name-placeholder');
+        statusMsg.textContent = '';
+        statusMsg.className = 'status-message';
+      } else {
+        fileNameDisplay.textContent = 'No file selected';
+        fileNameDisplay.classList.add('file-name-placeholder');
+      }
+    }
+
+    fileInput.addEventListener('change', updateFileName);
+
+    filePickerBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      fileInput.click();
+    });
+
+    uploadForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const files = fileInput.files;
+      
+      if (!files || files.length === 0) {
+        statusMsg.textContent = '⚠️ Please select a file.';
+        statusMsg.className = 'status-message error';
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = '⏳ Processing...';
+      loader.style.display = 'block';
+      statusMsg.textContent = '📤 Uploading and generating barcodes...';
+      statusMsg.className = 'status-message info';
+      resultsSection.style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('uploadedFile', fileInput.files[0]);
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          statusMsg.textContent = `✅ ${data.message}`;
+          statusMsg.className = 'status-message success';
+          
+          let html = `
+            <p><strong>📁 File:</strong> ${data.filename}</p>
+            <p><strong>📊 Rows processed:</strong> ${data.row_count}</p>
+            <p><strong>📋 Columns:</strong> ${data.columns.join(', ')}</p>
+            <p><strong>🏷️ Barcodes generated:</strong> ${data.barcode_count} of ${data.row_count}</p>
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <a href="/download/pdf/${data.pdf_filename}" class="download-btn" style="background: #dc3545;">
+                📄 Download PDF with Barcodes
+              </a>
+              <a href="/download/excel/${data.excel_filename}" class="download-btn" style="background: #28a745;">
+                📊 Download Excel File
+              </a>
+            </div>
+          `;
+          
+          if (data.preview && data.preview.length > 0) {
+            html += `<div class="preview-box" style="margin-top: 15px;">
+              <p><strong>Preview (first ${data.preview.length} rows):</strong></p>
+              <div style="overflow-x: auto; margin-top: 10px;">
+                <table style="width:100%; border-collapse: collapse; font-size: 12px;">
+                  <thead>
+                    <tr style="background: #0e4b64; color: white;">
+                      ${Object.keys(data.preview[0]).map(col => `<th style="padding: 8px; text-align: left; border: 1px solid #ddd;">${col}</th>`).join('')}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${data.preview.map(row => `
+                      <tr>
+                        ${Object.values(row).map(val => {
+                          if (typeof val === 'string' && val.includes('<img')) {
+                            return `<td style="padding: 8px; border: 1px solid #ddd;">${val}</td>`;
+                          }
+                          return `<td style="padding: 8px; border: 1px solid #ddd;">${val}</td>`;
+                        }).join('')}
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>`;
+          }
+          
+          resultsContent.innerHTML = html;
+          resultsSection.style.display = 'block';
+          
+        } else {
+          statusMsg.textContent = `❌ ${data.error}`;
+          statusMsg.className = 'status-message error';
+        }
+      } catch (error) {
+        statusMsg.textContent = `❌ Connection error: ${error.message}`;
+        statusMsg.className = 'status-message error';
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload & Generate Barcodes';
+        loader.style.display = 'none';
+      }
+    });
+
+    fileInput.addEventListener('change', function() {
+      statusMsg.textContent = '';
+      statusMsg.className = 'status-message';
+      resultsSection.style.display = 'none';
+    });
+
+    updateFileName();
+  })();
+</script>
+
+</body>
+</html>

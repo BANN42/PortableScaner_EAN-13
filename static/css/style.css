@@ -1,0 +1,251 @@
+/* Global reset & full-page centering */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(145deg, #f6f9fc 0%, #e6f0f5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      padding: 1.5rem;
+    }
+
+    /* Card-style form container – perfectly centered */
+    .upload-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 3rem 1rem 3rem 1rem;
+      box-shadow: 0 20px 40px -12px rgba(0, 20, 30, 0.35),
+                  0 8px 24px -6px rgba(0, 0, 0, 0.08);
+      padding: 3rem 2.5rem;
+      max-width: 520px;
+      width: 100%;
+      transition: 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    /* Title / subtle header */
+    .upload-card h2 {
+      font-weight: 500;
+      font-size: 1.8rem;
+      letter-spacing: -0.02em;
+      color: #0b2a3b;
+      margin-bottom: 2rem;
+      text-align: center;
+      border-bottom: 2px solid rgba(0, 120, 180, 0.2);
+      padding-bottom: 0.75rem;
+      display: inline-block;
+      width: 100%;
+    }
+
+    /* The form itself – vertical flex */
+    .upload-form {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.8rem;
+    }
+
+    /* ---- File input wrapper (custom styled) ---- */
+    .file-input-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .file-input-wrapper label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1e4a5f;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-left: 0.25rem;
+    }
+
+    /* hide the native input, use custom button + filename display */
+    .file-input-area {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 2px dashed #b6d4e3;
+      border-radius: 60px;
+      padding: 0.2rem 0.2rem 0.2rem 1.5rem;
+      transition: border 0.2s, background 0.2s;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .file-input-area:hover {
+      border-color: #2f8db5;
+      background: #fafdff;
+    }
+
+    .file-input-area:focus-within {
+      border-color: #0f6b8f;
+      box-shadow: 0 0 0 4px rgba(25, 130, 180, 0.15);
+    }
+
+    /* custom file input: visually hidden but interactive */
+    .file-input-area input[type="file"] {
+      position: absolute;
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    /* fake "choose file" button */
+    .file-picker-btn {
+      background: #1d6f8f;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.6rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.05s;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+      box-shadow: 0 4px 8px -4px rgba(0, 60, 90, 0.25);
+      flex-shrink: 0;
+    }
+
+    .file-picker-btn:hover {
+      background: #135571;
+    }
+
+    .file-picker-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* filename display */
+    #file-name-display {
+      flex: 1;
+      padding: 0 0.8rem;
+      font-size: 0.95rem;
+      color: #1a4052;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .file-name-placeholder {
+      opacity: 0.5;
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    /* ---- Upload button (full width, prominent) ---- */
+    .upload-btn {
+      background: #0e4b64;
+      border: none;
+      border-radius: 80px;
+      padding: 1rem 0.5rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 8px 18px -6px rgba(0, 50, 70, 0.3);
+      transition: background 0.15s, transform 0.08s, box-shadow 0.2s;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .upload-btn:hover {
+      background: #093d52;
+      box-shadow: 0 10px 22px -6px #0a3345;
+    }
+
+    .upload-btn:active {
+      transform: scale(0.97);
+      background: #06303f;
+    }
+
+    .upload-btn:focus-visible {
+      outline: 3px solid #6ab0d0;
+      outline-offset: 2px;
+    }
+
+    /* small icon (optional, just for style) */
+    .upload-btn::before {
+      content: "⬆";
+      font-size: 1.3rem;
+      display: inline-block;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+    }
+
+    /* simple status / message (hidden by default) */
+    .status-message {
+      margin-top: 0.4rem;
+      font-size: 0.9rem;
+      color: #1d5f7a;
+      text-align: center;
+      min-height: 1.6rem;
+      padding: 0.2rem;
+      border-radius: 40px;
+      background: rgba(0, 100, 150, 0.04);
+      transition: 0.15s;
+    }
+
+    /* small screen tweaks */
+    @media (max-width: 480px) {
+      .upload-card {
+        padding: 2rem 1.5rem;
+        border-radius: 2rem 0.8rem 2rem 0.8rem;
+      }
+      .file-input-area {
+        flex-wrap: wrap;
+        border-radius: 40px;
+        padding: 0.5rem 0.5rem 0.5rem 1rem;
+        gap: 0.3rem;
+      }
+      .file-picker-btn {
+        padding: 0.5rem 1.2rem;
+        font-size: 0.8rem;
+      }
+      #file-name-display {
+        font-size: 0.85rem;
+        padding: 0.2rem 0.4rem;
+        flex-basis: 100%;
+        text-align: center;
+      }
+      .upload-btn {
+        font-size: 1.1rem;
+        padding: 0.8rem 0.5rem;
+      }
+    }
+
+    /* accessibility: focus style for file input (via label) */
+    .file-input-area input[type="file"]:focus-visible + .file-picker-btn {
+      outline: 3px solid #0f6b8f;
+      outline-offset: 2px;
+    }
+
+/* Download buttons */
+.download-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
